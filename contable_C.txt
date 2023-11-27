@@ -1,0 +1,193 @@
+#include <stdio.h>
+#include <string.h>
+
+// Estructura para almacenar la información de un producto
+struct Producto {
+    char nombre[50];
+    int cantidad;
+    float precio;
+};
+
+// Estructura para almacenar la información de una venta
+struct Venta {
+    char nombreProducto[50];
+    int cantidadVendida;
+    char fecha[20];
+};
+
+// Funciones
+void comprarProducto(struct Producto inventario[], int *totalProductos);
+void editarProducto(struct Producto inventario[], int totalProductos);
+void eliminarProducto(struct Producto inventario[], int *totalProductos);
+void venderProducto(struct Producto inventario[], int totalProductos, struct Venta ventas[], int *totalVentas);
+void mostrarRegistroVentas(struct Venta ventas[], int totalVentas);
+void mostrarInventario(struct Producto inventario[], int totalProductos);
+
+int main() {
+    struct Producto inventario[100];  // Capacidad máxima de 100 productos
+    struct Venta ventas[100];  // Capacidad máxima de 100 ventas
+    int totalProductos = 0;
+    int totalVentas = 0;
+    int opcion;
+
+    do {
+        printf("\nMenú:\n");
+        printf("1. Comprar producto\n");
+        printf("2. Editar producto\n");
+        printf("3. Eliminar producto\n");
+        printf("4. Vender producto\n");
+        printf("5. Mostrar registro de ventas\n");
+        printf("6. Mostrar inventario\n");
+        printf("7. Salir\n");
+        printf("Ingrese su opción: ");
+        scanf("%d", &opcion);
+
+        switch (opcion) {
+            case 1:
+                comprarProducto(inventario, &totalProductos);
+                break;
+            case 2:
+                mostrarInventario(inventario, totalProductos);
+                editarProducto(inventario, totalProductos);
+                break;
+            case 3:
+                mostrarInventario(inventario, totalProductos);
+                eliminarProducto(inventario, &totalProductos);
+                break;
+            case 4:
+                mostrarInventario(inventario, totalProductos);
+                venderProducto(inventario, totalProductos, ventas, &totalVentas);
+                break;
+            case 5:
+                mostrarRegistroVentas(ventas, totalVentas);
+                break;
+            case 6:
+                mostrarInventario(inventario, totalProductos);
+                break;
+            case 7:
+                printf("Saliendo del programa.\n");
+                break;
+            default:
+                printf("Opción no válida. Inténtelo de nuevo.\n");
+        }
+    } while (opcion != 7);
+
+    return 0;
+}
+
+void comprarProducto(struct Producto inventario[], int *totalProductos) {
+    struct Producto nuevoProducto;
+
+    printf("Ingrese el nombre del producto: ");
+    scanf("%s", nuevoProducto.nombre);
+    printf("Ingrese la cantidad: ");
+    scanf("%d", &nuevoProducto.cantidad);
+    printf("Ingrese el precio: ");
+    scanf("%f", &nuevoProducto.precio);
+
+    inventario[*totalProductos] = nuevoProducto;
+    (*totalProductos)++;
+
+    printf("Producto comprado exitosamente.\n");
+}
+
+void editarProducto(struct Producto inventario[], int totalProductos) {
+    int indice;
+
+    printf("Ingrese el índice del producto que desea editar (0 - %d): ", totalProductos - 1);
+    scanf("%d", &indice);
+
+    if (indice >= 0 && indice < totalProductos) {
+        printf("Ingrese el nuevo nombre del producto: ");
+        scanf("%s", inventario[indice].nombre);
+        printf("Ingrese la nueva cantidad: ");
+        scanf("%d", &inventario[indice].cantidad);
+        printf("Ingrese el nuevo precio: ");
+        scanf("%f", &inventario[indice].precio);
+
+        printf("Producto editado exitosamente.\n");
+    } else {
+        printf("Índice no válido.\n");
+    }
+}
+
+void eliminarProducto(struct Producto inventario[], int *totalProductos) {
+    int indice;
+
+    printf("Ingrese el índice del producto que desea eliminar (0 - %d): ", *totalProductos - 1);
+    scanf("%d", &indice);
+
+    if (indice >= 0 && indice < *totalProductos) {
+        // Mover los elementos restantes para llenar el espacio eliminado
+        for (int i = indice; i < *totalProductos - 1; ++i) {
+            inventario[i] = inventario[i + 1];
+        }
+
+        (*totalProductos)--;
+        printf("Producto eliminado exitosamente.\n");
+    } else {
+        printf("Índice no válido.\n");
+    }
+}
+
+void venderProducto(struct Producto inventario[], int totalProductos, struct Venta ventas[], int *totalVentas) {
+    int indice;
+    printf("Ingrese el índice del producto vendido (0-%d): ", totalProductos - 1);
+    scanf("%d", &indice);
+
+    if (indice >= 0 && indice < totalProductos) {
+        struct Venta nuevaVenta;
+
+        printf("Ingrese la cantidad vendida del producto: ");
+        scanf("%d", &nuevaVenta.cantidadVendida);
+
+        if (nuevaVenta.cantidadVendida > 0 && nuevaVenta.cantidadVendida <= inventario[indice].cantidad) {
+            printf("Ingrese la fecha de la venta: ");
+            scanf("%s", nuevaVenta.fecha);
+
+            strcpy(nuevaVenta.nombreProducto, inventario[indice].nombre);
+
+            ventas[*totalVentas] = nuevaVenta;
+            (*totalVentas)++;
+
+            inventario[indice].cantidad -= nuevaVenta.cantidadVendida;
+
+            printf("Venta registrada exitosamente.\n");
+        } else {
+            printf("Cantidad no válida o insuficiente en inventario.\n");
+        }
+    } else {
+        printf("Índice no válido.\n");
+    }
+}
+
+
+void mostrarRegistroVentas(struct Venta ventas[], int totalVentas) {
+    if (totalVentas == 0) {
+        printf("No hay ventas registradas.\n");
+        return;
+    }
+
+    printf("Registro de ventas:\n");
+    for (int i = 0; i < totalVentas; ++i) {
+        printf("Producto: %s\n", ventas[i].nombreProducto);
+        printf("Cantidad vendida: %d\n", ventas[i].cantidadVendida);
+        printf("Fecha de la venta: %s\n", ventas[i].fecha);
+        printf("---------------------------\n");
+    }
+}
+
+void mostrarInventario(struct Producto inventario[], int totalProductos) {
+    if (totalProductos == 0) {
+        printf("El inventario está vacío.\n");
+        return;
+    }
+
+    printf("Inventario:\n");
+    for (int i = 0; i < totalProductos; ++i) {
+        printf("Nombre: %s\n", inventario[i].nombre);
+        printf("Cantidad: %d\n", inventario[i].cantidad);
+        printf("Precio: %.2f\n", inventario[i].precio);
+        printf("---------------------------\n");
+    }
+}
